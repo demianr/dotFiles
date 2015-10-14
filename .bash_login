@@ -1,9 +1,6 @@
 . ~/.bash_aliases
 . ~/.bash_env
 
-export EDITOR=vim
-export LC_ALL=en_GB.UTF-8
-
 function timer_start {
   timer=${timer:-$SECONDS}
 }
