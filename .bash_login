@@ -1,0 +1,47 @@
+. ~/.bash_aliases
+
+export EDITOR=vim
+export LC_ALL=en_GB.UTF-8
+
+function timer_start {
+  timer=${timer:-$SECONDS}
+}
+
+trap 'timer_start' DEBUG
+
+function __prompt_command() {
+        local EXIT="$?"
+        timer_show=$(($SECONDS - $timer))
+        unset timer
+	branch=$(git status 2>/dev/null | head -1 | awk '{print $3}')
+
+	PS1=''
+        if [ "$color_prompt" = yes ]; then
+            PS1+='\# ${timer_show}s ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@macbook\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]'
+        else
+            PS1+='\# ${timer_show}s ${debian_chroot:+($debian_chroot)}\u@macbook:\w'
+        fi
+        unset color_prompt
+
+        case "$TERM" in xterm*|rxvt*)
+            PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@macbook: \w\a\]$PS1"
+            ;;
+        *)
+            ;;
+        esac
+
+        local RCol='\[\e[0m\]'  # Reset
+        local BRed='\[\e[1;31m\]'; # Bold red
+        local BGreen='\[\e[1;32m\]'; # Bold green
+        if [ $EXIT != 0 ]; then
+                PS1+=" ${BRed}[${EXIT}]${RCol}" 
+        fi
+	if [ "$HOME" == "${PWD:0:${#HOME}}" ];
+	then
+		PS1+="${BGreen} ${branch}\$ ${RCol}"
+	else
+	        PS1+=' ${branch}\$ '
+	fi
+}
+
+export PROMPT_COMMAND=__prompt_command
